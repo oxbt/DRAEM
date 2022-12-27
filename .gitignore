@@ -8,3 +8,4 @@ checkpoints/
 datasets/
 outputs/
 __pycache__/
+logs/

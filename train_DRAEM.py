@@ -53,7 +53,7 @@ def train_on_device(obj_names, args):
         dataset = MVTecDRAEMTrainDataset(args.data_path + obj_name + "/train/good/", args.anomaly_source_path, resize_shape=[256, 256])
 
         dataloader = DataLoader(dataset, batch_size=args.bs,
-                                shuffle=True, num_workers=16)
+                                shuffle=True, num_workers=0)
 
         n_iter = 0
         for epoch in range(args.epochs):
