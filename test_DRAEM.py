@@ -67,52 +67,54 @@ def test(obj_names, mvtec_path, checkpoint_path, base_model_name):
         anomaly_score_gt = []
         anomaly_score_prediction = []
 
+        '''
         display_images = torch.zeros((16 ,3 ,256 ,256)).cuda()
         display_gt_images = torch.zeros((16 ,3 ,256 ,256)).cuda()
         display_out_masks = torch.zeros((16 ,1 ,256 ,256)).cuda()
         display_in_masks = torch.zeros((16 ,1 ,256 ,256)).cuda()
+        '''
         cnt_display = 0
         display_indices = np.random.randint(len(dataloader), size=(16,))
 
+        with torch.no_grad():
+            for i_batch, sample_batched in enumerate(dataloader):
 
-        for i_batch, sample_batched in enumerate(dataloader):
+                gray_batch = sample_batched["image"].cuda()
 
-            gray_batch = sample_batched["image"].cuda()
+                is_normal = sample_batched["has_anomaly"].detach().numpy()[0 ,0]
+                anomaly_score_gt.append(is_normal)
+                true_mask = sample_batched["mask"]
+                true_mask_cv = true_mask.detach().numpy()[0, :, :, :].transpose((1, 2, 0))
 
-            is_normal = sample_batched["has_anomaly"].detach().numpy()[0 ,0]
-            anomaly_score_gt.append(is_normal)
-            true_mask = sample_batched["mask"]
-            true_mask_cv = true_mask.detach().numpy()[0, :, :, :].transpose((1, 2, 0))
+                gray_rec = model(gray_batch)
+                joined_in = torch.cat((gray_rec.detach(), gray_batch), dim=1)
 
-            gray_rec = model(gray_batch)
-            joined_in = torch.cat((gray_rec.detach(), gray_batch), dim=1)
+                out_mask = model_seg(joined_in)
+                out_mask_sm = torch.softmax(out_mask, dim=1)
 
-            out_mask = model_seg(joined_in)
-            out_mask_sm = torch.softmax(out_mask, dim=1)
+                '''
+                if i_batch in display_indices:
+                    t_mask = out_mask_sm[:, 1:, :, :]
+                    display_images[cnt_display] = gray_rec[0]
+                    display_gt_images[cnt_display] = gray_batch[0]
+                    display_out_masks[cnt_display] = t_mask[0]
+                    display_in_masks[cnt_display] = true_mask[0]
+                    cnt_display += 1
+                '''
 
+                out_mask_cv = out_mask_sm[0 ,1 ,: ,:].detach().cpu().numpy()
 
-            if i_batch in display_indices:
-                t_mask = out_mask_sm[:, 1:, :, :]
-                display_images[cnt_display] = gray_rec[0]
-                display_gt_images[cnt_display] = gray_batch[0]
-                display_out_masks[cnt_display] = t_mask[0]
-                display_in_masks[cnt_display] = true_mask[0]
-                cnt_display += 1
+                out_mask_averaged = torch.nn.functional.avg_pool2d(out_mask_sm[: ,1: ,: ,:], 21, stride=1,
+                                                                padding=21 // 2).cpu().detach().numpy()
+                image_score = np.max(out_mask_averaged)
 
+                anomaly_score_prediction.append(image_score)
 
-            out_mask_cv = out_mask_sm[0 ,1 ,: ,:].detach().cpu().numpy()
-
-            out_mask_averaged = torch.nn.functional.avg_pool2d(out_mask_sm[: ,1: ,: ,:], 21, stride=1,
-                                                               padding=21 // 2).cpu().detach().numpy()
-            image_score = np.max(out_mask_averaged)
-
-            anomaly_score_prediction.append(image_score)
-
-            flat_true_mask = true_mask_cv.flatten()
-            flat_out_mask = out_mask_cv.flatten()
-            total_pixel_scores[mask_cnt * img_dim * img_dim:(mask_cnt + 1) * img_dim * img_dim] = flat_out_mask
-            total_gt_pixel_scores[mask_cnt * img_dim * img_dim:(mask_cnt + 1) * img_dim * img_dim] = flat_true_mask
-            mask_cnt += 1
+                flat_true_mask = true_mask_cv.flatten()
+                flat_out_mask = out_mask_cv.flatten()
+                total_pixel_scores[mask_cnt * img_dim * img_dim:(mask_cnt + 1) * img_dim * img_dim] = flat_out_mask
+                total_gt_pixel_scores[mask_cnt * img_dim * img_dim:(mask_cnt + 1) * img_dim * img_dim] = flat_true_mask
+                mask_cnt += 1
 
         anomaly_score_prediction = np.array(anomaly_score_prediction)
         anomaly_score_gt = np.array(anomaly_score_gt)
