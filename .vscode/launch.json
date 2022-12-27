@@ -1,0 +1,24 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "--gpu_id", "0",                
+                "--base_model_name","DRAEM_seg_large_ae_large_0.0001_800_bs8",
+                "--checkpoint_path", "./checkpoints/DRAEM_checkpoints/", 
+                "--data_path", "./datasets/mvtec/",                
+                //"--base_model_name","DRAEM_test_0.0001_20_bs8",
+                //"--checkpoint_path", "./checkpoints/" 
+            ]
+        }
+    ]
+}

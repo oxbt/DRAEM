@@ -156,7 +156,9 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    obj_list = ['capsule',
+    obj_list = ['capsule']
+
+    obj_list_all = ['capsule',
                  'bottle',
                  'carpet',
                  'leather',
