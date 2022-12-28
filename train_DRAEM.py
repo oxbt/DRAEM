@@ -6,6 +6,7 @@ from tensorboard_visualizer import TensorboardVisualizer
 from model_unet import ReconstructiveSubNetwork, DiscriminativeSubNetwork
 from loss import FocalLoss, SSIM
 import os
+from skimage.filters import edges
 
 def get_lr(optimizer):
     for param_group in optimizer.param_groups:

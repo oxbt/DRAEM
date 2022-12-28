@@ -51,4 +51,7 @@ with pretrained models can be run with:
 python test_DRAEM.py --gpu_id 0 --base_model_name "DRAEM_seg_large_ae_large_0.0001_800_bs8" --data_path ./datasets/mvtec/ --checkpoint_path ./checkpoints/DRAEM_checkpoints/
 ```
 
-
+## pyinstaller生成的exe
+```
+./test_DRAEM --gpu_id 0 --base_model_name "DRAEM_seg_large_ae_large_0.0001_800_bs8" --data_path ../../datasets/mvtec/ --checkpoint_path ../../checkpoints/DRAEM_checkpoints/
+```

@@ -7,6 +7,11 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from model_unet import ReconstructiveSubNetwork, DiscriminativeSubNetwork
 import os
 
+import skimage.filters.edges
+import sklearn.metrics._pairwise_distances_reduction._datasets_pair
+import sklearn.metrics._pairwise_distances_reduction._middle_term_computer
+
+
 def write_results_to_file(run_name, image_auc, pixel_auc, image_ap, pixel_ap):
     if not os.path.exists('./outputs/'):
         os.makedirs('./outputs/')

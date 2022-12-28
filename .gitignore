@@ -7,5 +7,7 @@
 checkpoints/
 datasets/
 outputs/
+build/
+dist/
 __pycache__/
 logs/
