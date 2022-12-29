@@ -240,11 +240,11 @@ class EncoderReconstructive(nn.Module):
             nn.ReLU(inplace=True))
 
 
-    def forward(self, x):
+    def forward(self, x):        
         b1 = self.block1(x)
         mp1 = self.mp1(b1)
         b2 = self.block2(mp1)
-        mp2 = self.mp3(b2)
+        mp2 = self.mp2(b2)
         b3 = self.block3(mp2)
         mp3 = self.mp3(b3)
         b4 = self.block4(mp3)

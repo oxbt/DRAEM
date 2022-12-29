@@ -28,19 +28,32 @@ def train_on_device(obj_names, args):
     if not os.path.exists(args.log_path):
         os.makedirs(args.log_path)
 
+    pretrained_base_model_name = "DRAEM_seg_large_ae_large_0.0001_800_bs8"   
+    pretrained_base_model_name = "DRAEM_checkpoints/" + pretrained_base_model_name    
+
     for obj_name in obj_names:
+        
+        pretrained_model = os.path.join(args.checkpoint_path, pretrained_base_model_name+"_"+obj_name+"_.pckl")
+        pretrained_model_seg = os.path.join(args.checkpoint_path, pretrained_base_model_name+"_"+obj_name+"__seg.pckl")
+
         run_name = 'DRAEM_test_'+str(args.lr)+'_'+str(args.epochs)+'_bs'+str(args.bs)+"_"+obj_name+'_'
 
         visualizer = TensorboardVisualizer(log_dir=os.path.join(args.log_path, run_name+"/"))
 
-        model = ReconstructiveSubNetwork(in_channels=3, out_channels=3)
+        model = ReconstructiveSubNetwork(in_channels=3, out_channels=3)                
         model.cuda()
-        model.apply(weights_init)
 
-        model_seg = DiscriminativeSubNetwork(in_channels=6, out_channels=2)
+        model_seg = DiscriminativeSubNetwork(in_channels=6, out_channels=2)                
         model_seg.cuda()
-        model_seg.apply(weights_init)
 
+        if args.pretrained:
+            model.load_state_dict(torch.load(pretrained_model, map_location='cuda:0'))
+            model_seg.load_state_dict(torch.load(pretrained_model_seg, map_location='cuda:0'))        
+        else:
+            model.apply(weights_init)       
+            model_seg.apply(weights_init)                
+
+        # optimizer获取所有parameters的引用，每个parameter都包含梯度（gradient），optimizer可以把根据梯度更新parameter。
         optimizer = torch.optim.Adam([
                                       {"params": model.parameters(), "lr": args.lr},
                                       {"params": model_seg.parameters(), "lr": args.lr}])
@@ -74,18 +87,26 @@ def train_on_device(obj_names, args):
                 ssim_loss = loss_ssim(gray_rec, gray_batch)
 
                 segment_loss = loss_focal(out_mask_sm, anomaly_mask)
+
+                # 对prediction和y之间进行比对（熵或者其他loss function），产生最初的梯度
                 loss = l2_loss + ssim_loss + segment_loss
 
+                # 清除之前的梯度，需要在loss.backward()之前调用
                 optimizer.zero_grad()
 
+                # loss.backward()，将梯度反向传播到整个网络的所有链路和节点，获得model的所有parameter的gradient
                 loss.backward()
+
+                # optimizer存了这些parameter的指针，step()根据这些parameter的gradient对parameter的值进行更新。
                 optimizer.step()
 
-                if args.visualize and n_iter % 2 == 0:
+                # loss 和 optimizer 之间是通过parameter建立的关系
+                
+                if args.visualize and n_iter % 8 == 0:
                     visualizer.plot_loss(l2_loss, n_iter, loss_name='l2_loss')
                     visualizer.plot_loss(ssim_loss, n_iter, loss_name='ssim_loss')
-                    visualizer.plot_loss(segment_loss, n_iter, loss_name='segment_loss')
-                if args.visualize and n_iter % 4 == 0:
+                    visualizer.plot_loss(segment_loss, n_iter, loss_name='segment_loss')                    
+                if args.visualize and n_iter % 8 == 0:
                     t_mask = out_mask_sm[:, 1:, :, :]
                     visualizer.visualize_image_batch(aug_gray_batch, n_iter, image_name='batch_augmented')
                     visualizer.visualize_image_batch(gray_batch, n_iter, image_name='batch_recon_target')
@@ -96,6 +117,7 @@ def train_on_device(obj_names, args):
 
                 n_iter +=1
 
+            # 对lr进行调整
             scheduler.step()
 
             torch.save(model.state_dict(), os.path.join(args.checkpoint_path, run_name+".pckl"))
@@ -116,6 +138,7 @@ if __name__=="__main__":
     parser.add_argument('--checkpoint_path', action='store', type=str, required=True)
     parser.add_argument('--log_path', action='store', type=str, required=True)
     parser.add_argument('--visualize', action='store_true')
+    parser.add_argument('--pretrained', action='store_true')
 
     args = parser.parse_args()
 
