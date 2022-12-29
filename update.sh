@@ -4,7 +4,7 @@ cd $script_dir
 
 now=$(date "+%Y-%m-%d")
 echo "Starting add-commit-pull-push..."
-pwd
-git add -A && git commit -m "$now" && git pull && git push
+
+git add -A && git commit -m "$now" && git pull && git push origin main
 echo "Finish!"
 read
