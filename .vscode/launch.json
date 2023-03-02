@@ -18,10 +18,10 @@
 
                 //test
                 ///*
-                //"--base_model_name","DRAEM_seg_large_ae_large_0.0001_800_bs8",
+                "--base_model_name","DRAEM_seg_large_ae_large_0.0001_800_bs8",
                 "--checkpoint_path", "./checkpoints/", 
                 //"--checkpoint_path", "./checkpoints/",
-                "--base_model_name","DRAEM_test_0.0001_10_bs8",
+                //"--base_model_name","DRAEM_test_0.0001_10_bs8",
                 //*/
                            
                 //train

@@ -7,11 +7,6 @@ from sklearn.metrics import roc_auc_score, average_precision_score
 from model_unet import ReconstructiveSubNetwork, DiscriminativeSubNetwork
 import os
 
-import skimage.filters.edges
-import sklearn.metrics._pairwise_distances_reduction._datasets_pair
-import sklearn.metrics._pairwise_distances_reduction._middle_term_computer
-
-
 def write_results_to_file(run_name, image_auc, pixel_auc, image_ap, pixel_ap):
     if not os.path.exists('./outputs/'):
         os.makedirs('./outputs/')
@@ -96,6 +91,33 @@ def test(obj_names, mvtec_path, checkpoint_path, base_model_name):
 
                 out_mask = model_seg(joined_in)
                 out_mask_sm = torch.softmax(out_mask, dim=1)
+
+                '''
+                # Export the model   
+                torch.onnx.export(model,         # model being run 
+                    gray_batch,       # model input (or a tuple for multiple inputs) 
+                    "./outputs/draem.onnx",       # where to save the model  
+                    export_params=True,  # store the trained parameter weights inside the model file 
+                    opset_version=11,    # the ONNX version to export the model to 
+                    do_constant_folding=True,  # whether to execute constant folding for optimization 
+                    input_names = ['modelInput'],   # the model's input names 
+                    output_names = ['modelOutput'], # the model's output names 
+                    dynamic_axes={'modelInput' : {0 : 'batch_size'},    # variable length axes 
+                                            'modelOutput' : {0 : 'batch_size'}}) 
+                # Export the model   
+                torch.onnx.export(model_seg,         # model being run 
+                    joined_in,       # model input (or a tuple for multiple inputs) 
+                    "./outputs/draem_seg.onnx",       # where to save the model  
+                    export_params=True,  # store the trained parameter weights inside the model file 
+                    opset_version=11,    # the ONNX version to export the model to 
+                    do_constant_folding=True,  # whether to execute constant folding for optimization 
+                    input_names = ['modelInput'],   # the model's input names 
+                    output_names = ['modelOutput'], # the model's output names 
+                    dynamic_axes={'modelInput' : {0 : 'batch_size'},    # variable length axes 
+                                            'modelOutput' : {0 : 'batch_size'}}) 
+                print(" ") 
+                print('Model has been converted to ONNX')
+                '''
 
                 '''
                 if i_batch in display_indices:
