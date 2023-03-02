@@ -14,26 +14,26 @@
             "args": [
                 //both
                 "--gpu_id", "0",                
-                "--data_path", "./datasets/mvtec/",                
+                "--data_path", "./datasets/mvtec/",                                
 
                 //test
-                //*
+                ///*
                 //"--base_model_name","DRAEM_seg_large_ae_large_0.0001_800_bs8",
-                //"--checkpoint_path", "./checkpoints/DRAEM_checkpoints/", 
-                "--checkpoint_path", "./checkpoints/",
+                "--checkpoint_path", "./checkpoints/", 
+                //"--checkpoint_path", "./checkpoints/",
                 "--base_model_name","DRAEM_test_0.0001_10_bs8",
                 //*/
                            
                 //train
-                /*
-                "--obj_id", "1",
+                /*                
+                "--obj_id", "2",
                 "--lr", "0.0001",
                 "--bs", "8", 
                 "--epochs", "10",
                 "--anomaly_source_path", "./datasets/dtd/images/", 
                 "--checkpoint_path", "./checkpoints/",
                 "--log_path", "./logs/",
-                "--visualize", "--pretrained"
+                "--visualize", "--pretrained",
                 //*/
             ]
         }

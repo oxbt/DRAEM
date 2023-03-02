@@ -162,7 +162,7 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    obj_list = ['bottle']
+    obj_list = ['carpet']
 
     obj_list1 = ['capsule',
                  'bottle',
